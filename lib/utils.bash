@@ -2,19 +2,48 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for savi.
 GH_REPO="https://github.com/savi-lang/savi"
 TOOL_NAME="savi"
-TOOL_TEST="savi eval 'env.out.print("Savi is installed!")'"
+TOOL_TEST="savi eval 'env.out.print(\"Savi is installed!\")'"
 
 fail() {
   echo -e "asdf-$TOOL_NAME: $*"
   exit 1
 }
 
+# We support a limited set of platforms in our binary builds.
+# Other platforms will need to build from source instead of using asdf.
+if uname | grep -iq 'Linux'; then
+  if uname -m | grep -iq 'x86_64'; then
+    if getconf GNU_LIBC_VERSION > /dev/null 2>&1; then
+      platform_triple='x86_64-unknown-linux-gnu'
+    elif ldd --version 2>&1 | grep -iq musl; then
+      platform_triple='x86_64-unknown-linux-musl'
+    else
+      fail "On Linux, the supported libc variants are: gnu, musl"
+    fi
+  else
+    fail "On Linux, the only curently supported arch is: x86_64"
+  fi
+elif uname | grep -iq 'FreeBSD'; then
+  if uname -m | grep -iq 'x86_64'; then
+    platform_triple='x86_64-unknown-freebsd'
+  else
+    fail "On FreeBSD, the only curently supported arch is: x86_64"
+  fi
+elif uname | grep -iq 'Darwin'; then
+  if uname -m | grep -iq 'x86_64'; then
+    platform_triple='x86_64-apple-macosx'
+  else
+    # TODO: Add arm64 (M1) when binary builds are supported
+    fail "On MacOSX, the only curently supported arch is: x86_64"
+  fi
+else
+  fail "The only supported operating systems are: Linux, FreeBSD, MacOSX"
+fi
+
 curl_opts=(-fsSL)
 
-# NOTE: You might want to remove this if savi is not hosted on GitHub releases.
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
   curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
 fi
@@ -26,13 +55,10 @@ sort_versions() {
 
 list_github_tags() {
   git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+    grep -o 'refs/tags/.*' | cut -d/ -f3-
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if savi has other means of determining installable versions.
   list_github_tags
 }
 
@@ -42,9 +68,9 @@ download_release() {
   filename="$2"
 
   # TODO: Adapt the release URL convention for savi
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  url="$GH_REPO/releases/download/${version}/${platform_triple}-savi.tar.gz"
 
-  echo "* Downloading $TOOL_NAME release $version..."
+  echo "* Downloading $TOOL_NAME release $version for $platform_triple..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
@@ -61,7 +87,6 @@ install_version() {
     mkdir -p "$install_path"
     cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
-    # TODO: Asert savi executable exists.
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
