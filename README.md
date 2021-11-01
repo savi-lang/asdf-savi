@@ -13,7 +13,9 @@
 
 # Install
 
-Plugin:
+First, [install asdf](https://asdf-vm.com/guide/getting-started.html#_1-install-dependencies).
+
+Then, install the Savi plugin into asdf:
 
 ```shell
 asdf plugin add savi
@@ -21,19 +23,19 @@ asdf plugin add savi
 asdf plugin add savi https://github.com/savi-lang/asdf-savi.git
 ```
 
-savi:
+Finally, use the plugin to install the Savi compiler:
 
 ```shell
-# Show all installable versions
+# Show all installable versions.
 asdf list-all savi
 
-# Install specific version
+# Install a specific version.
 asdf install savi latest
 
-# Set a version globally (on your ~/.tool-versions file)
+# Set a version globally (on your ~/.tool-versions file).
 asdf global savi latest
 
-# Now savi commands are available
+# Now the Savi compiler is available.
 savi eval 'env.out.print("Savi is installed!")'
 ```
 
