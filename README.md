@@ -18,8 +18,6 @@ First, [install asdf](https://asdf-vm.com/guide/getting-started.html#_1-install-
 Then, install the Savi plugin into asdf:
 
 ```shell
-asdf plugin add savi
-# or
 asdf plugin add savi https://github.com/savi-lang/asdf-savi.git
 ```
 
