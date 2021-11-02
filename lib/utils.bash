@@ -25,21 +25,16 @@ if uname | grep -iq 'Linux'; then
   else
     fail "On Linux, the only curently supported arch is: x86_64"
   fi
-elif uname | grep -iq 'FreeBSD'; then
-  if uname -m | grep -iq 'x86_64'; then
-    platform_triple='x86_64-unknown-freebsd'
-  else
-    fail "On FreeBSD, the only curently supported arch is: x86_64"
-  fi
+  # TODO: Add FreeBSD when binary builds for it are supported.
 elif uname | grep -iq 'Darwin'; then
   if uname -m | grep -iq 'x86_64'; then
     platform_triple='x86_64-apple-macosx'
   else
-    # TODO: Add arm64 (M1) when binary builds are supported
-    fail "On MacOSX, the only curently supported arch is: x86_64"
+    # TODO: Add arm64 (M1) when binary builds for it are supported.
+    fail "On Darwin, the only curently supported arch is: x86_64"
   fi
 else
-  fail "The only supported operating systems are: Linux, FreeBSD, MacOSX"
+  fail "The only supported operating systems are: Linux, Darwin"
 fi
 
 curl_opts=(-fsSL)
