@@ -11,30 +11,12 @@ fail() {
   exit 1
 }
 
-# We support a limited set of platforms in our binary builds.
-# Other platforms will need to build from source instead of using asdf.
-if uname | grep -iq 'Linux'; then
-  if uname -m | grep -iq 'x86_64'; then
-    if getconf GNU_LIBC_VERSION > /dev/null 2>&1; then
-      platform_triple='x86_64-unknown-linux-gnu'
-    elif ldd --version 2>&1 | grep -iq musl; then
-      platform_triple='x86_64-unknown-linux-musl'
-    else
-      fail "On Linux, the supported libc variants are: gnu, musl"
-    fi
-  else
-    fail "On Linux, the only curently supported arch is: x86_64"
-  fi
-  # TODO: Add FreeBSD when binary builds for it are supported.
-elif uname | grep -iq 'Darwin'; then
-  if uname -m | grep -iq 'x86_64'; then
-    platform_triple='x86_64-apple-macosx'
-  else
-    # TODO: Add arm64 (M1) when binary builds for it are supported.
-    fail "On Darwin, the only curently supported arch is: x86_64"
-  fi
-else
-  fail "The only supported operating systems are: Linux, Darwin"
+current_script_path=${BASH_SOURCE[0]}
+plugin_dir=$(dirname "$(dirname "$current_script_path")")
+
+platform_triple=`${plugin_dir}/lib/platform.sh`
+if [ -z "${platform_triple:-}" ]; then
+  fail "Aborting installation due to this platform not being supported."
 fi
 
 curl_opts=(-fsSL)
