@@ -1,22 +1,38 @@
 name: Build
 
 on:
+  workflow_dispatch:     # allow manual trigger
+  schedule:
+    - cron: "0 10 * * *" # daily at 10:00 UTC
+  pull_request:          # on pull request
   push:
-    branches:
-      - main
-  pull_request:
+    branches: [main]     # on commit to main branch
 
 jobs:
-  plugin_test:
-    name: asdf plugin test
+  test:
     strategy:
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{matrix.os}}
     steps:
-      - name: asdf_plugin_test
-        uses: asdf-vm/actions/plugin-test@v1
+      - uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: savi eval 'env.out.print("Savi is installed!")'
+
+  test_container:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: fedora:latest
+            deps: dnf install -y gcc libatomic git findutils
+    runs-on: ubuntu-latest
+    container:
+      image: ${{matrix.image}}
+    steps:
+      - run: ${{matrix.deps}}
+      - uses: asdf-vm/actions/plugin-test@v1
         with:
           command: savi eval 'env.out.print("Savi is installed!")'
