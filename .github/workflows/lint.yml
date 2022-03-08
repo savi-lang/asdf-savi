@@ -1,10 +1,10 @@
 name: Lint
 
 on:
+  pull_request:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
   shellcheck:
@@ -18,19 +18,3 @@ jobs:
 
       - name: Run ShellCheck
         run: scripts/shellcheck.bash
-
-  shellfmt:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install asdf dependencies
-        uses: asdf-vm/actions/install@v1
-
-      - name: List file to shfmt
-        run: shfmt -f .
-
-      - name: Run shfmt
-        run: scripts/shfmt.bash
-
