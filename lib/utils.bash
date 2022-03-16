@@ -46,9 +46,9 @@ download_release() {
   filename="$2"
 
   # TODO: Adapt the release URL convention for savi
-  url="$GH_REPO/releases/download/${version}/${platform_triple}-savi.tar.gz"
+  url="$GH_REPO/releases/download/v${version}/${platform_triple}-savi.tar.gz"
 
-  echo "* Downloading $TOOL_NAME release $version for $platform_triple..."
+  echo "* Downloading $TOOL_NAME release v$version for $platform_triple..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
