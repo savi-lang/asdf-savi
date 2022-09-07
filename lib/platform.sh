@@ -23,7 +23,12 @@ if uname | grep -iq 'Linux'; then
   else
     fail "On Linux, the only arch currently supported is: x86_64"
   fi
-  # TODO: Add FreeBSD when binary builds for it are supported.
+elif uname | grep -iq 'FreeBSD'; then
+  if uname -m | grep -iq 'amd64'; then
+    echo 'x86_64-unknown-freebsd'
+  else
+    fail "On FreeBSD, the only arch currently supported is: x86_64"
+  fi
 elif uname | grep -iq 'Darwin'; then
   if uname -m | grep -iq 'x86_64'; then
     echo 'x86_64-apple-macosx'
